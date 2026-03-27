@@ -1,0 +1,37 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id             String      @id @default(uuid())
+  email          String      @unique
+  password       String
+  fullName       String
+  profilePicture String?
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  bestResult     BestResult?
+
+  @@map("users")
+}
+
+model BestResult {
+  id                 Int       @id @default(autoincrement())
+  userId             String    @unique
+  bestFrontendScore  Int?
+  bestBackendScore   Int?
+  bestMobileScore    Int?
+  frontendAchievedAt DateTime?
+  backendAchievedAt  DateTime?
+  mobileAchievedAt   DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  user               User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("best_results")
+}
