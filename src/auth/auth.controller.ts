@@ -15,14 +15,14 @@ import {
   ApiOperation,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { User } from '@prisma/client';
-import type { Request, Response } from 'express';
 import { Authorization } from 'src/auth/decorators/authorization.decorator';
 import { Authorized } from 'src/auth/decorators/authorized.decorator';
 import { AuthResponse } from 'src/auth/dto/auth.dto';
 import { LoginRequest } from 'src/auth/dto/login.dto';
 import { RegisterRequest } from 'src/auth/dto/register.dto';
+import type { User } from '../generated/prisma/client';
 import { AuthService } from './auth.service';
+import { Request, Response } from 'express';
 
 @Controller('auth')
 export class AuthController {
