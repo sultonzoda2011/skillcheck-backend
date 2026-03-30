@@ -45,7 +45,7 @@ export class AuthService {
   async register(res: Response, dto: RegisterRequest) {
     const { fullName, email, password } = dto;
     const existingUser = await this.prismaService.user.findUnique({
-      where: { email },
+      where: { email: email.toLowerCase() },
     });
 
     if (existingUser) {
@@ -57,7 +57,7 @@ export class AuthService {
     const user = await this.prismaService.user.create({
       data: {
         fullName,
-        email,
+        email: email.toLowerCase(),
         password: hashedPassword,
         role: isAdminEmail ? 'ADMIN' : 'USER',
       },
@@ -85,7 +85,12 @@ export class AuthService {
     if (!refreshToken) {
       throw new UnauthorizedException('Invalid or expired refresh token');
     }
-    const payload: JwtPayload = await this.jwtService.verifyAsync(refreshToken);
+    let payload: JwtPayload;
+    try {
+      payload = await this.jwtService.verifyAsync(refreshToken);
+    } catch (error) {
+      throw new UnauthorizedException('Invalid or expired refresh token');
+    }
     if (payload) {
       const user = await this.prismaService.user.findUnique({
         where: {
@@ -123,7 +128,7 @@ export class AuthService {
   async login(res: Response, dto: LoginRequest) {
     const { email, password } = dto;
     const user = await this.prismaService.user.findUnique({
-      where: { email },
+      where: { email: email.toLowerCase() },
       include: { bestResult: true },
     });
 
