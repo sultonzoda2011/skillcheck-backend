@@ -1,7 +1,6 @@
 import {
   Body,
   Controller,
-  Get,
   HttpCode,
   HttpStatus,
   Post,
@@ -11,34 +10,39 @@ import {
 import {
   ApiBadRequestResponse,
   ApiConflictResponse,
+  ApiCreatedResponse,
   ApiOkResponse,
   ApiOperation,
+  ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { Authorization } from 'src/auth/decorators/authorization.decorator';
-import { Authorized } from 'src/auth/decorators/authorized.decorator';
-import { AuthResponse } from 'src/auth/dto/auth.dto';
+import { AuthResponse, RefreshResponse } from 'src/auth/dto/auth.dto';
 import { LoginRequest } from 'src/auth/dto/login.dto';
 import { RegisterRequest } from 'src/auth/dto/register.dto';
-import type { User } from '../generated/prisma/client';
 import { AuthService } from './auth.service';
 import { Request, Response } from 'express';
 
+@ApiTags('Авторизация')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
+
   @ApiOperation({
-    summary: 'Register a new user',
-    description: 'Creates a new user account with the provided details.',
+    summary: 'Регистрация нового пользователя',
+    description:
+      'Создает новую учетную запись пользователя с предоставленными данными.',
   })
-  @ApiOkResponse({
+  @ApiCreatedResponse({
     type: AuthResponse,
+    description:
+      'Пользователь успешно зарегистрирован. Возвращает данные пользователя и токен.',
   })
   @ApiBadRequestResponse({
-    description: 'Invalid input data for registration',
+    description:
+      'Некорректные входные данные для регистрации (например, невалидный email или короткий пароль)',
   })
   @ApiConflictResponse({
-    description: 'User with this email already exists',
+    description: 'Пользователь с таким email уже существует',
   })
   @HttpCode(HttpStatus.CREATED)
   @Post('register')
@@ -48,18 +52,22 @@ export class AuthController {
   ) {
     return this.authService.register(res, dto);
   }
+
   @ApiOperation({
-    summary: 'Login a user',
-    description: 'Authenticates a user with the provided email and password.',
+    summary: 'Вход в систему',
+    description:
+      'Аутентифицирует пользователя с использованием email и пароля. Устанавливает refresh token в HTTP-only куки.',
   })
   @ApiOkResponse({
     type: AuthResponse,
+    description:
+      'Пользователь успешно вошел в систему. Возвращает данные пользователя и токен.',
   })
   @ApiBadRequestResponse({
-    description: 'Invalid input data for login',
+    description: 'Некорректные входные данные для входа',
   })
-  @ApiConflictResponse({
-    description: 'User with this email already exists',
+  @ApiUnauthorizedResponse({
+    description: 'Неверный email или пароль',
   })
   @HttpCode(HttpStatus.OK)
   @Post('login')
@@ -69,15 +77,18 @@ export class AuthController {
   ) {
     return this.authService.login(res, dto);
   }
+
   @ApiOperation({
-    summary: 'Refresh a user',
-    description: 'Refreshes the access token for a user.',
+    summary: 'Обновление токенов',
+    description:
+      'Обновляет access token с использованием refresh token из куки.',
   })
   @ApiOkResponse({
-    type: AuthResponse,
+    type: RefreshResponse,
+    description: 'Access token успешно обновлен',
   })
   @ApiUnauthorizedResponse({
-    description: ' Invalid or expired refresh token',
+    description: 'Невалидный или истекший токен обновления (refresh token)',
   })
   @HttpCode(HttpStatus.OK)
   @Post('refresh')
@@ -87,19 +98,17 @@ export class AuthController {
   ) {
     return this.authService.refresh(res, req);
   }
+
   @ApiOperation({
-    summary: 'Logout a user',
-    description: 'Logs out a user by clearing the refresh token.',
+    summary: 'Выход из системы',
+    description: 'Удаляет сессию пользователя, очищая refresh token из куки.',
+  })
+  @ApiOkResponse({
+    description: 'Выход из системы успешно выполнен. Куки очищены.',
   })
   @HttpCode(HttpStatus.OK)
   @Post('logout')
   async logout(@Res({ passthrough: true }) res: Response) {
     return this.authService.logout(res);
-  }
-  @Authorization()
-  @HttpCode(HttpStatus.OK)
-  @Get('profile')
-  profile(@Authorized() user: User) {
-    return user;
   }
 }
