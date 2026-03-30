@@ -4,7 +4,10 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
-import { TestsModule } from './tests/tests.module';
+import { ProfileModule } from './profile/profile.module';
+import { BestResultsModule } from './best-results/best-results.module';
+import { AdminModule } from './admin/admin.module';
+import { ReviewsModule } from './reviews/reviews.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -12,7 +15,10 @@ import { TestsModule } from './tests/tests.module';
     }),
     PrismaModule,
     AuthModule,
-    TestsModule,
+    ProfileModule,
+    BestResultsModule,
+    AdminModule,
+    ReviewsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
