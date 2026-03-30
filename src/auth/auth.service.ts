@@ -51,13 +51,32 @@ export class AuthService {
     if (existingUser) {
       throw new ConflictException('User with this email already exists');
     }
+    const isAdminEmail = email.toLowerCase() === 'admin@tjk.com';
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const user = await this.prismaService.user.create({
-      data: { fullName, email, password: hashedPassword },
+      data: {
+        fullName,
+        email,
+        password: hashedPassword,
+        role: isAdminEmail ? 'ADMIN' : 'USER',
+      },
     });
+    const bestResult = await this.prismaService.bestResult.create({
+      data: {
+        userId: user.id,
+        backendAchievedAt: new Date(),
+        frontendAchievedAt: new Date(),
+        mobileAchievedAt: new Date(),
+        bestBackendScore: 0,
+        bestFrontendScore: 0,
+
+        bestMobileScore: 0,
+      },
+    });
+
     return {
-      user: { ...user, password: undefined },
+      user: { ...user, password: undefined, bestResult },
       tokens: this.auth(res, user.id),
     };
   }
@@ -105,6 +124,7 @@ export class AuthService {
     const { email, password } = dto;
     const user = await this.prismaService.user.findUnique({
       where: { email },
+      include: { bestResult: true },
     });
 
     if (!user) {
@@ -124,14 +144,5 @@ export class AuthService {
   async logout(res: Response) {
     this.setCookie(res, 'refreshToken', new Date(0));
     return { message: 'Logged out successfully' };
-  }
-  async validate(id: string) {
-    const user = await this.prismaService.user.findUnique({
-      where: { id },
-    });
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
-    return user;
   }
 }
