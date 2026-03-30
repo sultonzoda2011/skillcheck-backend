@@ -12,6 +12,7 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import {
   ApiBadRequestResponse,
+  ApiBearerAuth,
   ApiBody,
   ApiConsumes,
   ApiOkResponse,
@@ -28,15 +29,16 @@ import { ChangePasswordDto } from 'src/profile/dto/change-password.dto';
 import { UserDto } from './dto/user.dto';
 
 @ApiTags('Профиль')
+@ApiBearerAuth()
 @Authorization()
 @Controller('profile')
 export class ProfileController {
   constructor(private readonly profileService: ProfileService) {}
 
   @ApiOperation({
-    summary: 'Получить профиль текущего пользователя',
+    summary: 'Получить данные текущего пользователя',
     description:
-      'Возвращает полную информацию о профиле авторизованного пользователя, включая лучшие результаты тестов.',
+      'Возвращает подробную информацию о профиле авторизованного пользователя, включая его персональные данные и лучшие результаты тестов.',
   })
   @ApiOkResponse({
     type: UserDto,
@@ -53,22 +55,23 @@ export class ProfileController {
 
   @Patch()
   @ApiOperation({
-    summary: 'Обновить данные профиля',
+    summary: 'Обновить информацию профиля',
     description:
-      'Позволяет изменить имя, email и загрузить новую аватарку. Использует multipart/form-data.',
+      'Позволяет изменить имя пользователя, его email (если не занят) и загрузить новую аватарку. Использует multipart/form-data для поддержки загрузки файлов.',
   })
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FileInterceptor('profilePicture'))
   @ApiBody({
     type: UpdateProfileDto,
-    description: 'Данные для обновления профиля и файл аватарки',
+    description: 'Объект с данными для обновления и файл изображения',
   })
   @ApiOkResponse({
     type: UserDto,
-    description: 'Профиль успешно обновлён',
+    description:
+      'Профиль успешно обновлён. Возвращает актуальные данные пользователя.',
   })
   @ApiBadRequestResponse({
-    description: 'Некорректные данные или неподдерживаемый формат файла',
+    description: 'Некорректные данные или неподдерживаемый формат изображения',
   })
   @ApiUnauthorizedResponse({
     description: 'Пользователь не авторизован',
@@ -87,16 +90,16 @@ export class ProfileController {
 
   @Post('change-password')
   @ApiOperation({
-    summary: 'Сменить пароль',
+    summary: 'Смена пароля',
     description:
-      'Позволяет пользователю изменить текущий пароль на новый. Требует подтверждения старого пароля.',
+      'Безопасное изменение текущего пароля пользователя. Требует ввода старого пароля и подтверждения нового.',
   })
   @ApiOkResponse({
     description: 'Пароль успешно изменён',
   })
   @ApiBadRequestResponse({
     description:
-      'Неверный текущий пароль, новый пароль не соответствует требованиям или пароли не совпадают',
+      'Старый пароль введен неверно или новый пароль не соответствует требованиям безопасности',
   })
   @ApiUnauthorizedResponse({
     description: 'Пользователь не авторизован',
