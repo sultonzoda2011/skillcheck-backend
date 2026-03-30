@@ -80,7 +80,7 @@ export class BestResultsService {
         email: true,
       },
     });
-    /* eslint-disable @typescript-eslint/no-unsafe-member-access */
+
     const leaderboardFiltered = leaderboard.filter((element) => {
       return (
         element.bestResult?.totalScore && element.bestResult.totalScore > 0
@@ -107,7 +107,7 @@ export class BestResultsService {
         email: true,
       },
     });
-    /* eslint-disable @typescript-eslint/no-unsafe-member-access */
+
     const leaderboardFiltered = leaderboard.filter((element) => {
       return (
         element.bestResult?.totalScore && element.bestResult.totalScore > 0
