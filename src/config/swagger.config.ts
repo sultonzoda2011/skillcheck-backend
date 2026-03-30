@@ -5,5 +5,6 @@ export function getSwaggerConfig() {
     .setTitle('SkillCheck API')
     .setDescription('API documentation for SkillCheck')
     .setVersion('1.0.0')
-    .addBearerAuth();
+    .addBearerAuth()
+    .addSecurityRequirements('bearer');
 }
