@@ -10,34 +10,39 @@ import {
 export class RegisterRequest {
   @ApiProperty({
     name: 'fullName',
-    description: 'Full name of the user',
-    example: 'John Doe',
+    description: 'Полное имя пользователя',
+    example: 'Иван Иванов',
     maxLength: 50,
   })
-  @IsString({ message: 'FullName must be a string' })
-  @IsNotEmpty({ message: 'FullName is required' })
-  @MaxLength(50, { message: 'FullName must be at most 50 characters' })
+  @IsString({ message: 'Имя должно быть строкой' })
+  @IsNotEmpty({ message: 'Имя обязательно для заполнения' })
+  @MaxLength(50, { message: 'Имя должно содержать максимум 50 символов' })
   fullName: string;
+
   @ApiProperty({
     name: 'email',
-    description: 'Email address of the user',
+    description: 'Email адрес пользователя',
     example: 'john.doe@example.com',
     maxLength: 255,
   })
-  @IsString({ message: 'Email must be a string' })
-  @IsNotEmpty({ message: 'Email  is required' })
-  @IsEmail({}, { message: 'Email must be a valid email address' })
+  @IsString({ message: 'Email должен быть строкой' })
+  @IsNotEmpty({ message: 'Email обязателен для заполнения' })
+  @IsEmail(
+    {},
+    { message: 'Email должен быть валидным адресом электронной почты' },
+  )
   email: string;
+
   @ApiProperty({
     name: 'password',
-    description: 'Password of the user',
+    description: 'Пароль пользователя',
     example: 'SecurePassword123',
     minLength: 6,
     maxLength: 128,
   })
-  @IsString({ message: 'Password must be a string' })
-  @IsNotEmpty({ message: 'Password  is required' })
-  @MinLength(6, { message: 'Password must be at least 6 characters' })
-  @MaxLength(128, { message: 'Password must be at most 128 characters' })
+  @IsString({ message: 'Пароль должен быть строкой' })
+  @IsNotEmpty({ message: 'Пароль обязателен для заполнения' })
+  @MinLength(6, { message: 'Пароль должен содержать минимум 6 символов' })
+  @MaxLength(128, { message: 'Пароль должен содержать максимум 128 символов' })
   password: string;
 }
