@@ -9,8 +9,18 @@ import { Prisma } from 'src/generated/prisma/browser';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ChangePasswordDto } from 'src/profile/dto/change-password.dto';
 import { UpdateProfileDto } from 'src/profile/dto/update-profile.dto';
-import { ALLOWED_MIME_TYPES, AVATARS_DIR } from './constants/avatar.constants';
+import {
+  ALLOWED_MIME_TYPES,
+  AVATARS_DIR,
+  AVATARS_URL_PREFIX,
+  resolveAvatarPath,
+} from './constants/avatar.constants';
 import { MulterFile, SafeUser, USER_SAFE_SELECT } from './types';
+import * as bcrypt from 'bcrypt';
+
+type UserUpdateInputWithMeta = Prisma.UserUpdateInput & {
+  __oldAvatarPath?: string;
+};
 
 @Injectable()
 export class ProfileService {
@@ -38,26 +48,55 @@ export class ProfileService {
     dto: UpdateProfileDto,
     file?: MulterFile,
   ): Promise<SafeUser> {
-    const updateData: Prisma.UserUpdateInput = {};
+    const updateData: UserUpdateInputWithMeta = {};
 
     this.applyNameUpdate(dto, updateData);
     await this.applyEmailUpdate(userId, dto, updateData);
     await this.applyAvatarUpdate(userId, file, updateData);
 
-    return this.saveUser(userId, updateData);
+    const oldAvatarPath = updateData.__oldAvatarPath;
+    delete updateData.__oldAvatarPath;
+
+    const result = await this.saveUser(userId, updateData);
+
+    if (oldAvatarPath) {
+      await this.deleteOldAvatar(oldAvatarPath);
+    }
+
+    return result;
   }
+
   async changePassword(userId: string, dto: ChangePasswordDto) {
     const { newPassword, confirmPassword, oldPassword } = dto;
-    const user = this.getUserById(userId);
-    if (
-      (await user).password == oldPassword &&
-      oldPassword === confirmPassword
-    ) {
-      return this.prismaService.user.update({
-        where: { id: userId },
-        data: { password: newPassword },
-      });
+
+    if (!userId) {
+      throw new BadRequestException('userId is required');
     }
+
+    const user = await this.prismaService.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const isPasswordValid = await bcrypt.compare(oldPassword, user.password);
+
+    if (!isPasswordValid) {
+      throw new BadRequestException('Invalid old password');
+    }
+
+    if (newPassword !== confirmPassword) {
+      throw new BadRequestException('Passwords do not match');
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    await this.prismaService.user.update({
+      where: { id: userId },
+      data: { password: hashedPassword },
+    });
   }
 
   private applyNameUpdate(
@@ -83,7 +122,7 @@ export class ProfileService {
   private async applyAvatarUpdate(
     userId: string,
     file: MulterFile | undefined,
-    updateData: Prisma.UserUpdateInput,
+    updateData: UserUpdateInputWithMeta,
   ): Promise<void> {
     if (!file) return;
 
@@ -98,13 +137,13 @@ export class ProfileService {
     updateData.profilePicture = avatarPath;
 
     if (currentUser?.profilePicture) {
-      await this.deleteOldAvatar(currentUser.profilePicture);
+      updateData.__oldAvatarPath = currentUser.profilePicture;
     }
   }
 
   private async deleteOldAvatar(profilePicturePath: string): Promise<void> {
     try {
-      const absolutePath = path.join(process.cwd(), profilePicturePath);
+      const absolutePath = resolveAvatarPath(profilePicturePath);
       await fs.unlink(absolutePath);
     } catch (error) {
       if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
@@ -115,6 +154,7 @@ export class ProfileService {
       }
     }
   }
+
   private async assertEmailNotTaken(
     userId: string,
     email: string,
@@ -154,7 +194,7 @@ export class ProfileService {
 
     await fs.writeFile(filePath, file.buffer);
 
-    return `/uploads/avatars/${fileName}`;
+    return `${AVATARS_URL_PREFIX}/${fileName}`;
   }
 
   private async saveUser(
