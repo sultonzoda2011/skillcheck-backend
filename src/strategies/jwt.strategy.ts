@@ -1,20 +1,21 @@
-import { Injectable } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
-import { AuthService } from 'src/auth/auth.service';
 import { JwtPayload } from 'src/auth/interfaces/jwt.interface';
+import { PrismaService } from 'src/prisma/prisma.service';
+
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(
-    private readonly authService: AuthService,
+    private readonly prismaService: PrismaService,
     private readonly configService: ConfigService,
   ) {
-    const secret = configService.get<string>('JWT_SECRET');
-
-    if (!secret) {
-      throw new Error('JWT_SECRET is not defined in environment variables');
-    }
+    const secret = configService.getOrThrow<string>('JWT_SECRET');
 
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -23,7 +24,17 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       algorithms: ['HS256'],
     });
   }
-  async validate(payload: JwtPayload): Promise<unknown> {
-    return await this.authService.validate(payload.id);
+
+  async validate(payload: JwtPayload) {
+    const user = await this.prismaService.user.findUnique({
+      where: { id: payload.id },
+      select: { id: true, role: true, isBlocked: true },
+    });
+
+    if (!user) throw new UnauthorizedException('User not found');
+    if (user.isBlocked)
+      throw new ForbiddenException('Ваш аккаунт заблокирован');
+
+    return user;
   }
 }
