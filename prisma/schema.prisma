@@ -11,27 +11,41 @@ model User {
   id             String      @id @default(uuid())
   email          String      @unique
   password       String
-  fullName       String
-  profilePicture String?
-  createdAt      DateTime    @default(now())
-  updatedAt      DateTime    @updatedAt
+  fullName       String?     @map("full_name")
+  profilePicture String?     @map("profile_picture")
+  createdAt      DateTime    @default(now()) @map("created_at")
+  updatedAt      DateTime    @updatedAt @map("updated_at")
+  role           UserRole    @default(USER) @map("role")
+  isBlocked      Boolean     @default(false) @map("is_blocked")
   bestResult     BestResult?
 
   @@map("users")
 }
 
+enum UserRole {
+  USER
+  ADMIN
+}
+
 model BestResult {
-  id                 Int       @id @default(autoincrement())
-  userId             String    @unique
-  bestFrontendScore  Int?
-  bestBackendScore   Int?
-  bestMobileScore    Int?
-  frontendAchievedAt DateTime?
-  backendAchievedAt  DateTime?
-  mobileAchievedAt   DateTime?
-  createdAt          DateTime  @default(now())
-  updatedAt          DateTime  @updatedAt
-  user               User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id     String @id @default(uuid())
+  userId String @unique @map("user_id")
+
+  bestFrontendScore Int @default(0) @map("best_frontend_score")
+  bestBackendScore  Int @default(0) @map("best_backend_score")
+  bestMobileScore   Int @default(0) @map("best_mobile_score")
+
+  totalScore         Int       @default(0) @map("total_score")
+  frontendAchievedAt DateTime? @map("frontend_achieved_at")
+  backendAchievedAt  DateTime? @map("backend_achieved_at")
+  mobileAchievedAt   DateTime? @map("mobile_achieved_at")
+  createdAt          DateTime  @default(now()) @map("created_at")
+  updatedAt          DateTime  @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("best_results")
+}
+model Review {
+  
 }
