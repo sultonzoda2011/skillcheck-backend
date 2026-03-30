@@ -27,7 +27,7 @@ export class RolesGuard implements CanActivate {
 
     const user = request.user;
 
-    if (!user || !user.role || !requiredRoles.includes(user.role)) {
+    if (!user || !user.role || !requiredRoles.includes(user.role as UserRole)) {
       console.log('❌ Role check failed. User role:', user?.role);
       throw new ForbiddenException(
         'Доступ запрещён. Требуется роль администратора.',
