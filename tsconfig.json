@@ -20,7 +20,7 @@
     "allowSyntheticDefaultImports": true,
 
     "paths": {
-      "src/*": ["./*"]
+      "src/*": ["src/*"]
     }
   }
 }
