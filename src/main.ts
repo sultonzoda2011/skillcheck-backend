@@ -1,12 +1,15 @@
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
-import * as cookieParser from 'cookie-parser';
+
+import cookieParser from 'cookie-parser';
 import { ResponseInterceptor } from 'src/common/interceptors/response.interceptor';
 import { setupSwagger } from 'src/utils/swagger.util';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+  app.use(cookieParser());
 
   app.enableCors({
     origin: [
@@ -19,7 +22,6 @@ async function bootstrap() {
     allowedHeaders: ['Origin', 'Content-Type', 'Accept', 'Authorization'],
   });
 
-  app.use(cookieParser());
   app.useGlobalPipes(new ValidationPipe());
   app.useGlobalInterceptors(new ResponseInterceptor());
 
