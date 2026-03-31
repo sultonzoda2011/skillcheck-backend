@@ -13,7 +13,6 @@ import { LoginRequest } from 'src/auth/dto/login.dto';
 import { RegisterRequest } from 'src/auth/dto/register.dto';
 import { JwtPayload } from 'src/auth/interfaces/jwt.interface';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { isDev } from 'src/utils/is-dev.util';
 @Injectable()
 export class AuthService {
   private readonly JWT_ACCESS_TOKEN_TTL: string;
@@ -22,10 +21,9 @@ export class AuthService {
   private setCookie(res: Response, value: string, expires: Date) {
     res.cookie('refreshToken', value, {
       httpOnly: true,
-      secure: !isDev(this.configService),
-      domain: this.COOKIE_DOMAIN,
       expires,
-      sameSite: isDev(this.configService) ? 'none' : 'lax',
+      sameSite: 'lax',
+      secure: false,
     });
   }
   constructor(
@@ -51,7 +49,6 @@ export class AuthService {
     if (existingUser) {
       throw new ConflictException('User with this email already exists');
     }
-    const isAdminEmail = email.toLowerCase() === 'admin@tjk.com';
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const user = await this.prismaService.user.create({
@@ -59,7 +56,7 @@ export class AuthService {
         fullName,
         email: email.toLowerCase(),
         password: hashedPassword,
-        role: isAdminEmail ? 'ADMIN' : 'USER',
+        role: 'USER',
       },
     });
     const bestResult = await this.prismaService.bestResult.create({
