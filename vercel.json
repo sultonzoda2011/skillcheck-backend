@@ -1,7 +1,7 @@
 {
     "version": 2,
     "builds": [{
-        "src": "dist/src/main.js",
+        "src": "package.json",
         "use": "@vercel/node",
         "config": {
             "includeFiles": ["dist/**", "src/generated/**", "prisma/**"]
