@@ -6,7 +6,7 @@
     "private": true,
     "license": "UNLICENSED",
     "scripts": {
-        "build": "npx prisma generate && nest build",
+        "build": "nest build",
         "vercel-build": "npm run build",
         "start:prod": "node -r tsconfig-paths/register dist/main.js",
         "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
@@ -22,6 +22,8 @@
         "test:e2e": "jest --config ./test/jest-e2e.json"
     },
     "dependencies": {
+        "@google/genai": "^1.47.0",
+        "@nestjs-modules/mailer": "^2.3.4",
         "@nestjs/common": "^11.0.1",
         "@nestjs/config": "^4.0.3",
         "@nestjs/core": "^11.0.1",
@@ -30,18 +32,19 @@
         "@nestjs/passport": "^11.0.5",
         "@nestjs/platform-express": "^11.0.1",
         "@nestjs/swagger": "^11.2.6",
-        "@prisma/adapter-neon": "^7.6.0",
         "@prisma/adapter-pg": "^7.4.1",
         "@prisma/client": "^7.6.0",
-        "argon2": "^0.44.0",
         "bcrypt": "^6.0.0",
         "class-transformer": "^0.5.1",
         "class-validator": "^0.14.3",
         "cookie-parser": "^1.4.7",
+        "nodemailer": "^8.0.4",
         "passport": "^0.7.0",
         "passport-jwt": "^4.0.1",
         "reflect-metadata": "^0.2.2",
-        "rxjs": "^7.8.1"
+        "rxjs": "^7.8.1",
+        "zod": "^4.3.6",
+        "zod-to-json-schema": "^3.25.2"
     },
     "devDependencies": {
         "@eslint/eslintrc": "^3.2.0",
