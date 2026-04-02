@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsInt, IsPositive, Min } from 'class-validator';
+import { IsEnum, IsInt, Min } from 'class-validator';
 
 export enum TestType {
   FRONTEND = 'frontend',
@@ -21,10 +21,9 @@ export class SaveBestResultDto {
   @ApiProperty({
     description: 'Набранный балл в тесте',
     example: 1250,
-    minimum: 0,
+    minimum: 1,
   })
   @IsInt({ message: 'Score должен быть целым числом' })
-  @IsPositive({ message: 'Score должен быть положительным числом' })
-  @Min(0, { message: 'Score не может быть отрицательным' })
+  @Min(1, { message: 'Score должен быть положительным числом' })
   score: number;
 }
