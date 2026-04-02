@@ -1,3 +1,9 @@
+import { Authorization } from '@/auth/decorators/authorization.decorator';
+import { Authorized } from '@/auth/decorators/authorized.decorator';
+import { ChangePasswordDto } from '@/profile/dto/change-password.dto';
+import { UpdateProfileDto } from '@/profile/dto/update-profile.dto';
+import { UserDto } from '@/profile/dto/user.dto';
+import { ProfileService } from '@/profile/profile.service';
 import {
   Body,
   Controller,
@@ -21,12 +27,6 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { User } from '@prisma/client';
-import { Authorization } from 'src/auth/decorators/authorization.decorator';
-import { Authorized } from 'src/auth/decorators/authorized.decorator';
-import { UpdateProfileDto } from 'src/profile/dto/update-profile.dto';
-import { ProfileService } from './profile.service';
-import { ChangePasswordDto } from 'src/profile/dto/change-password.dto';
-import { UserDto } from './dto/user.dto';
 
 @ApiTags('Профиль')
 @ApiBearerAuth()

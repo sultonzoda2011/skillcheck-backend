@@ -1,13 +1,11 @@
-import { Injectable } from '@nestjs/common';
 import {
   SaveBestResultDto,
   TestType,
-} from 'src/best-results/dto/save-best-result.dto';
-import {
-  BestResult,
-  BestResultUpdateData,
-} from 'src/best-results/types/best-result.types';
-import { PrismaService } from 'src/prisma/prisma.service';
+} from '@/best-results/dto/save-best-result.dto';
+import { BestResultUpdateData } from '@/best-results/types/best-result.types';
+import { PrismaService } from '@/prisma/prisma.service';
+import { Injectable } from '@nestjs/common';
+import { BestResult } from '@prisma/client';
 
 @Injectable()
 export class BestResultsService {

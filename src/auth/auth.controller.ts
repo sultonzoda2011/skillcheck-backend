@@ -1,3 +1,7 @@
+import { AuthService } from '@/auth/auth.service';
+import { AuthResponse, RefreshResponse } from '@/auth/dto/auth.dto';
+import { LoginRequest } from '@/auth/dto/login.dto';
+import { RegisterRequest } from '@/auth/dto/register.dto';
 import {
   ForgotPasswordDto,
   ResetPasswordDto,
@@ -21,10 +25,6 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { Request, Response } from 'express';
-import { AuthResponse, RefreshResponse } from 'src/auth/dto/auth.dto';
-import { LoginRequest } from 'src/auth/dto/login.dto';
-import { RegisterRequest } from 'src/auth/dto/register.dto';
-import { AuthService } from './auth.service';
 
 @ApiTags('Авторизация')
 @Controller('auth')
@@ -117,7 +117,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @Post('forgot-password')
   async forgotPassword(@Body() dto: ForgotPasswordDto) {
-    return this.authService.forgotPassword(dto);
+    return await this.authService.forgotPassword(dto);
   }
 
   @ApiOperation({

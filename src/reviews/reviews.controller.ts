@@ -1,3 +1,9 @@
+import { Authorized } from '@/auth/decorators/authorized.decorator';
+import { JwtGuard } from '@/auth/guards/auth.guard';
+import { Roles } from '@/common/decorators/roles.decorator';
+import { RolesGuard } from '@/common/guards/role.guard';
+import { CreateReviewDto } from '@/reviews/dto/create-review.dto';
+import { ReviewsService } from '@/reviews/reviews.service';
 import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -8,13 +14,7 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { Authorized } from 'src/auth/decorators/authorized.decorator';
-import { JwtGuard } from 'src/auth/guards/auth.guard';
-import { Roles } from 'src/common/decorators/roles.decorator';
-import { RolesGuard } from 'src/common/guards/role.guard';
 import { User } from '@prisma/client';
-import { CreateReviewDto } from 'src/reviews/dto/create-review.dto';
-import { ReviewsService } from './reviews.service';
 
 @ApiTags('Отзывы')
 @Controller('reviews')

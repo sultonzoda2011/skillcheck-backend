@@ -1,8 +1,8 @@
+import { AiService } from '@/ai/ai.service';
+import { RandomController } from '@/ai/random/random.controller';
+import { RandomService } from '@/ai/random/random.service';
+import { PrismaModule } from '@/prisma/prisma.module';
 import { Module } from '@nestjs/common';
-import { PrismaModule } from 'src/prisma/prisma.module';
-import { AiService } from '../ai.service';
-import { RandomController } from './random.controller';
-import { RandomService } from './random.service';
 
 @Module({
   imports: [PrismaModule],

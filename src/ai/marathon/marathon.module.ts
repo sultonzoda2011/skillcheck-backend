@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
-import { MarathonController } from './marathon.controller';
-import { MarathonService } from './marathon.service';
-import { AiService } from '../ai.service';
-import { PrismaModule } from 'src/prisma/prisma.module';
+import { PrismaModule } from '@/prisma/prisma.module';
+import { AiService } from '@/ai/ai.service';
+import { MarathonService } from '@/ai/marathon/marathon.service';
+import { MarathonController } from '@/ai/marathon/marathon.controller';
 
 @Module({
   imports: [PrismaModule],

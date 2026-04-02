@@ -1,8 +1,12 @@
+import { LoginRequest } from '@/auth/dto/login.dto';
+import { RegisterRequest } from '@/auth/dto/register.dto';
 import {
   ForgotPasswordDto,
   ResetPasswordDto,
 } from '@/auth/dto/reset.password.dto';
+import { JwtPayload } from '@/auth/interfaces/jwt.interface';
 import { MailService } from '@/mail/mail.service';
+import { PrismaService } from '@/prisma/prisma.service';
 import {
   BadRequestException,
   ConflictException,
@@ -16,10 +20,6 @@ import * as bcrypt from 'bcrypt';
 import { randomBytes } from 'crypto';
 import type { Request, Response } from 'express';
 import { StringValue } from 'ms';
-import { LoginRequest } from 'src/auth/dto/login.dto';
-import { RegisterRequest } from 'src/auth/dto/register.dto';
-import { JwtPayload } from 'src/auth/interfaces/jwt.interface';
-import { PrismaService } from 'src/prisma/prisma.service';
 
 interface ResetTokenPayload {
   id: string;

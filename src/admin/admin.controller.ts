@@ -1,3 +1,8 @@
+import { AdminService } from '@/admin/admin.service';
+import { UpdateUserStatusDto } from '@/admin/dto/update-user-status.dto';
+import { JwtGuard } from '@/auth/guards/auth.guard';
+import { Roles } from '@/common/decorators/roles.decorator';
+import { RolesGuard } from '@/common/guards/role.guard';
 import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
@@ -8,11 +13,6 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { UpdateUserStatusDto } from 'src/admin/dto/update-user-status.dto';
-import { JwtGuard } from 'src/auth/guards/auth.guard';
-import { Roles } from 'src/common/decorators/roles.decorator';
-import { RolesGuard } from 'src/common/guards/role.guard';
-import { AdminService } from './admin.service';
 
 @ApiTags('Администрирование')
 @ApiBearerAuth()

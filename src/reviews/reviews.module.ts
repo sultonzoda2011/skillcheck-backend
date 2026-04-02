@@ -1,7 +1,7 @@
+import { ProfileModule } from '@/profile/profile.module';
+import { ReviewsController } from '@/reviews/reviews.controller';
+import { ReviewsService } from '@/reviews/reviews.service';
 import { Module } from '@nestjs/common';
-import { ReviewsService } from './reviews.service';
-import { ReviewsController } from './reviews.controller';
-import { ProfileModule } from 'src/profile/profile.module';
 
 @Module({
   imports: [ProfileModule],

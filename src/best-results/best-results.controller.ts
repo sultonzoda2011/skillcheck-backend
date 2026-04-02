@@ -1,3 +1,7 @@
+import { Authorization } from '@/auth/decorators/authorization.decorator';
+import { Authorized } from '@/auth/decorators/authorized.decorator';
+import { BestResultsService } from '@/best-results/best-results.service';
+import { SaveBestResultDto } from '@/best-results/dto/save-best-result.dto';
 import { Body, Controller, Get, Post } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
@@ -7,11 +11,7 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { Authorization } from 'src/auth/decorators/authorization.decorator';
-import { Authorized } from 'src/auth/decorators/authorized.decorator';
-import { SaveBestResultDto } from 'src/best-results/dto/save-best-result.dto';
 import { User } from '@prisma/client';
-import { BestResultsService } from './best-results.service';
 
 @ApiTags('Результаты тестов')
 @Controller('best-results')

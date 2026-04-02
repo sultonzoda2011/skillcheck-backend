@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-enum-comparison */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unsafe-return */
+
+import { ApiResponseDto } from '@/common/dto/api-response.dto';
 import {
   CallHandler,
   ExecutionContext,
@@ -11,7 +12,6 @@ import {
 import { Response } from 'express';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { ApiResponseDto } from 'src/common/dto/api-response.dto';
 
 @Injectable()
 export class ResponseInterceptor<T = any> implements NestInterceptor<

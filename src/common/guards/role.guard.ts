@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
+import { ROLES_KEY } from '@/common/decorators/roles.decorator';
 import {
   CanActivate,
   ExecutionContext,
@@ -7,7 +8,6 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { ROLES_KEY } from 'src/common/decorators/roles.decorator';
 import { UserRole } from '@prisma/client';
 
 @Injectable()

@@ -1,7 +1,7 @@
+import { UpdateUserStatusDto } from '@/admin/dto/update-user-status.dto';
+import { PrismaService } from '@/prisma/prisma.service';
+import { ADMIN_USER_SELECT } from '@/profile/types';
 import { Injectable } from '@nestjs/common';
-import { UpdateUserStatusDto } from 'src/admin/dto/update-user-status.dto';
-import { PrismaService } from 'src/prisma/prisma.service';
-import { ADMIN_USER_SELECT } from 'src/profile/types';
 
 @Injectable()
 export class AdminService {

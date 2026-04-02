@@ -1,5 +1,5 @@
+import { UserDto } from '@/profile/dto/user.dto';
 import { ApiProperty } from '@nestjs/swagger';
-import { UserDto } from 'src/profile/dto/user.dto';
 
 export class TokensDto {
   @ApiProperty({

@@ -1,22 +1,22 @@
 import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
-import * as bcrypt from 'bcrypt';
-import * as fs from 'fs/promises';
-import * as path from 'path';
-import { Prisma } from '@prisma/client';
-import { PrismaService } from 'src/prisma/prisma.service';
-import { ChangePasswordDto } from 'src/profile/dto/change-password.dto';
-import { UpdateProfileDto } from 'src/profile/dto/update-profile.dto';
-import {
   ALLOWED_MIME_TYPES,
   AVATARS_DIR,
   AVATARS_URL_PREFIX,
   resolveAvatarPath,
-} from './constants/avatar.constants';
-import { MulterFile, SafeUser, USER_SAFE_SELECT } from './types';
+} from '@/profile/constants/avatar.constants';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { Prisma } from '@prisma/client';
+import * as bcrypt from 'bcrypt';
+import * as fs from 'fs/promises';
+import * as path from 'path';
+import { MulterFile, SafeUser, USER_SAFE_SELECT } from '@/profile/types/index';
+import { PrismaService } from '@/prisma/prisma.service';
+import { UpdateProfileDto } from '@/profile/dto/update-profile.dto';
+import { ChangePasswordDto } from '@/profile/dto/change-password.dto';
 
 type UserUpdateInputWithMeta = Prisma.UserUpdateInput & {
   __oldAvatarPath?: string;

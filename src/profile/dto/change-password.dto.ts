@@ -1,6 +1,6 @@
+import { Match } from '@/auth/decorators/match.decorator';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString, Length, Matches, IsNotEmpty } from 'class-validator';
-import { Match } from 'src/auth/decorators/match.decorator';
 export class ChangePasswordDto {
   @ApiProperty({ description: 'Текущий пароль' })
   @IsString()

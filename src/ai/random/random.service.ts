@@ -1,7 +1,7 @@
+import { AiService } from '@/ai/ai.service';
+import { Questions } from '@/ai/quiz.schema';
+import { PrismaService } from '@/prisma/prisma.service';
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from 'src/prisma/prisma.service';
-import { AiService } from '../ai.service';
-import { type Questions } from '../quiz.schema';
 export interface RandomParams {
   type: string;
   topic: string;
