@@ -20,7 +20,12 @@ async function bootstrap() {
     allowedHeaders: ['Origin', 'Content-Type', 'Accept', 'Authorization'],
   });
 
-  app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      transform: true,
+    }),
+  );
   app.useGlobalInterceptors(new ResponseInterceptor());
 
   setupSwagger(app);
