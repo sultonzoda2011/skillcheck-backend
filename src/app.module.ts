@@ -8,6 +8,9 @@ import { ProfileModule } from './profile/profile.module';
 import { BestResultsModule } from './best-results/best-results.module';
 import { AdminModule } from './admin/admin.module';
 import { ReviewsModule } from './reviews/reviews.module';
+import { AiModule } from './ai/ai.module';
+import { QuizTopicsModule } from './quiz-topics/quiz-topics.module';
+import { MailModule } from './mail/mail.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -19,6 +22,9 @@ import { ReviewsModule } from './reviews/reviews.module';
     BestResultsModule,
     AdminModule,
     ReviewsModule,
+    AiModule,
+    QuizTopicsModule,
+    MailModule,
   ],
   controllers: [AppController],
   providers: [AppService],
