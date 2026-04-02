@@ -28,9 +28,6 @@ export class BestResultsService {
 
     const updateData: BestResultUpdateData = {};
 
-    const totalScore = score + ((bestResult?.totalScore as number) ?? 0);
-    updateData.totalScore = totalScore;
-
     if (
       type === TestType.FRONTEND &&
       score > (bestResult?.bestFrontendScore ?? 0)
@@ -58,6 +55,14 @@ export class BestResultsService {
     if (Object.keys(updateData).length === 0) {
       return undefined;
     }
+
+    const newFrontend =
+      updateData.bestFrontendScore ?? bestResult?.bestFrontendScore ?? 0;
+    const newBackend =
+      updateData.bestBackendScore ?? bestResult?.bestBackendScore ?? 0;
+    const newMobile =
+      updateData.bestMobileScore ?? bestResult?.bestMobileScore ?? 0;
+    updateData.totalScore = newFrontend + newBackend + newMobile;
 
     return this.prismaService.bestResult.update({
       where: { userId },
