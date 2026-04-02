@@ -1,4 +1,8 @@
 import {
+  ForgotPasswordDto,
+  ResetPasswordDto,
+} from '@/auth/dto/reset.password.dto';
+import {
   Body,
   Controller,
   HttpCode,
@@ -16,11 +20,11 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
+import { Request, Response } from 'express';
 import { AuthResponse, RefreshResponse } from 'src/auth/dto/auth.dto';
 import { LoginRequest } from 'src/auth/dto/login.dto';
 import { RegisterRequest } from 'src/auth/dto/register.dto';
 import { AuthService } from './auth.service';
-import { Request, Response } from 'express';
 
 @ApiTags('Авторизация')
 @Controller('auth')
@@ -97,6 +101,43 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ) {
     return this.authService.refresh(res, req);
+  }
+
+  @ApiOperation({
+    summary: 'Запрос сброса пароля',
+    description:
+      'Отправляет email с ссылкой для сброса пароля. Ссылка действительна 15 минут.',
+  })
+  @ApiOkResponse({
+    description: 'Если аккаунт существует, письмо для сброса отправлено.',
+  })
+  @ApiBadRequestResponse({
+    description: 'Некорректные входные данные',
+  })
+  @HttpCode(HttpStatus.OK)
+  @Post('forgot-password')
+  async forgotPassword(@Body() dto: ForgotPasswordDto) {
+    return this.authService.forgotPassword(dto);
+  }
+
+  @ApiOperation({
+    summary: 'Сброс пароля по токену',
+    description:
+      'Устанавливает новый пароль с использованием токена из письма.',
+  })
+  @ApiOkResponse({
+    description: 'Пароль успешно изменён.',
+  })
+  @ApiBadRequestResponse({
+    description: 'Пароли не совпадают или некорректные данные',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Токен невалиден или истёк',
+  })
+  @HttpCode(HttpStatus.OK)
+  @Post('reset-password')
+  async resetPassword(@Body() dto: ResetPasswordDto) {
+    return this.authService.resetPassword(dto);
   }
 
   @ApiOperation({
