@@ -1,0 +1,4 @@
+# .vercelignore
+dist
+.env
+.env.local
