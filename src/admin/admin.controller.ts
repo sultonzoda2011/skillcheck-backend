@@ -2,21 +2,21 @@ import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
+  ApiForbiddenResponse,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
   ApiUnauthorizedResponse,
-  ApiForbiddenResponse,
 } from '@nestjs/swagger';
 import { UpdateUserStatusDto } from 'src/admin/dto/update-user-status.dto';
+import { JwtGuard } from 'src/auth/guards/auth.guard';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { RolesGuard } from 'src/common/guards/role.guard';
 import { AdminService } from './admin.service';
-import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 
 @ApiTags('Администрирование')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard, RolesGuard)
+@UseGuards(JwtGuard, RolesGuard)
 @Controller('admin')
 @Roles('ADMIN')
 export class AdminController {
