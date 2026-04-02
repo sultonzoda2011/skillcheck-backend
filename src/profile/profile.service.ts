@@ -3,9 +3,10 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import * as bcrypt from 'bcrypt';
 import * as fs from 'fs/promises';
 import * as path from 'path';
-import { Prisma } from 'src/generated/prisma/browser';
+import { Prisma } from 'src/generated/prisma';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ChangePasswordDto } from 'src/profile/dto/change-password.dto';
 import { UpdateProfileDto } from 'src/profile/dto/update-profile.dto';
@@ -16,7 +17,6 @@ import {
   resolveAvatarPath,
 } from './constants/avatar.constants';
 import { MulterFile, SafeUser, USER_SAFE_SELECT } from './types';
-import * as bcrypt from 'bcrypt';
 
 type UserUpdateInputWithMeta = Prisma.UserUpdateInput & {
   __oldAvatarPath?: string;
@@ -51,7 +51,6 @@ export class ProfileService {
     const updateData: UserUpdateInputWithMeta = {};
 
     this.applyNameUpdate(dto, updateData);
-    await this.applyEmailUpdate(userId, dto, updateData);
     await this.applyAvatarUpdate(userId, file, updateData);
 
     const oldAvatarPath = updateData.__oldAvatarPath;
@@ -108,17 +107,6 @@ export class ProfileService {
     }
   }
 
-  private async applyEmailUpdate(
-    userId: string,
-    dto: UpdateProfileDto,
-    updateData: Prisma.UserUpdateInput,
-  ): Promise<void> {
-    if (!dto.email) return;
-
-    await this.assertEmailNotTaken(userId, dto.email);
-    updateData.email = dto.email;
-  }
-
   private async applyAvatarUpdate(
     userId: string,
     file: MulterFile | undefined,
@@ -152,21 +140,6 @@ export class ProfileService {
           error,
         );
       }
-    }
-  }
-
-  private async assertEmailNotTaken(
-    userId: string,
-    email: string,
-  ): Promise<void> {
-    const existingUser = await this.prismaService.user.findUnique({
-      where: { email },
-    });
-
-    if (existingUser && existingUser.id !== userId) {
-      throw new BadRequestException(
-        'Этот email уже используется другим пользователем',
-      );
     }
   }
 
