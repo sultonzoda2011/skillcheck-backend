@@ -1,20 +1,20 @@
 import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import {
   ApiBearerAuth,
+  ApiCreatedResponse,
+  ApiForbiddenResponse,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
   ApiUnauthorizedResponse,
-  ApiForbiddenResponse,
-  ApiCreatedResponse,
 } from '@nestjs/swagger';
 import { Authorized } from 'src/auth/decorators/authorized.decorator';
-import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { JwtGuard } from 'src/auth/guards/auth.guard';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { RolesGuard } from 'src/common/guards/role.guard';
+import { User } from 'src/generated/prisma/client';
 import { CreateReviewDto } from 'src/reviews/dto/create-review.dto';
 import { ReviewsService } from './reviews.service';
-import { User } from 'src/generated/prisma/client';
 
 @ApiTags('Отзывы')
 @Controller('reviews')
@@ -33,7 +33,7 @@ export class ReviewsController {
   }
 
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtGuard)
   @Post()
   @ApiOperation({
     summary: 'Создать новый отзыв',
@@ -49,7 +49,7 @@ export class ReviewsController {
   }
 
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtGuard, RolesGuard)
   @Roles('ADMIN')
   @Get('/pending')
   @ApiOperation({
@@ -65,7 +65,7 @@ export class ReviewsController {
   }
 
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtGuard, RolesGuard)
   @Roles('ADMIN')
   @Post('/approve/:id')
   @ApiOperation({
