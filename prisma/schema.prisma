@@ -1,6 +1,6 @@
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client"
 }
 
 datasource db {
@@ -11,7 +11,7 @@ model User {
   id             String      @id @default(uuid())
   email          String      @unique
   password       String
-  fullName       String?     @map("full_name")
+  fullName       String     @map("full_name")
   profilePicture String?     @map("profile_picture")
   createdAt      DateTime    @default(now()) @map("created_at")
   updatedAt      DateTime    @updatedAt @map("updated_at")
@@ -61,4 +61,19 @@ model Review {
   user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("reviews")
+}
+
+model QuizTopic {
+  id            String   @id @default(uuid())
+  type          String
+  topic         String
+  difficulty    String
+  description   String
+  codeLanguages String[] @map("code_languages")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  @@unique([type, topic, difficulty])
+  @@index([type, topic])
+  @@map("quiz_topics")
 }
