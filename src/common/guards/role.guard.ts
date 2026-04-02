@@ -8,7 +8,7 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { ROLES_KEY } from 'src/common/decorators/roles.decorator';
-import { UserRole } from 'src/generated/prisma/enums';
+import { UserRole } from 'src/generated/prisma';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
@@ -20,15 +20,12 @@ export class RolesGuard implements CanActivate {
       [context.getHandler(), context.getClass()],
     );
 
-    const request = context.switchToHttp().getRequest();
-    console.log('🔍 User in RolesGuard:', request.user);
-
     if (!requiredRoles) return true;
 
+    const request = context.switchToHttp().getRequest();
     const user = request.user;
 
     if (!user || !user.role || !requiredRoles.includes(user.role as UserRole)) {
-      console.log('❌ Role check failed. User role:', user?.role);
       throw new ForbiddenException(
         'Доступ запрещён. Требуется роль администратора.',
       );
