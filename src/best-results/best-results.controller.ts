@@ -10,7 +10,7 @@ import {
 import { Authorization } from 'src/auth/decorators/authorization.decorator';
 import { Authorized } from 'src/auth/decorators/authorized.decorator';
 import { SaveBestResultDto } from 'src/best-results/dto/save-best-result.dto';
-import { User } from 'src/generated/prisma/browser';
+import { User } from 'src/generated/prisma';
 import { BestResultsService } from './best-results.service';
 
 @ApiTags('Результаты тестов')
