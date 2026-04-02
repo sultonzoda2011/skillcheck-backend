@@ -1,4 +1,10 @@
 import {
+  ForgotPasswordDto,
+  ResetPasswordDto,
+} from '@/auth/dto/reset.password.dto';
+import { MailService } from '@/mail/mail.service';
+import {
+  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
@@ -7,28 +13,39 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
+import { randomBytes } from 'crypto';
 import type { Request, Response } from 'express';
 import { StringValue } from 'ms';
 import { LoginRequest } from 'src/auth/dto/login.dto';
 import { RegisterRequest } from 'src/auth/dto/register.dto';
 import { JwtPayload } from 'src/auth/interfaces/jwt.interface';
 import { PrismaService } from 'src/prisma/prisma.service';
+
+interface ResetTokenPayload {
+  id: string;
+  purpose: 'password-reset';
+}
+
 @Injectable()
 export class AuthService {
   private readonly JWT_ACCESS_TOKEN_TTL: string;
   private readonly JWT_REFRESH_TOKEN_TTL: string;
   private readonly COOKIE_DOMAIN: string;
+  private readonly isProduction: boolean;
+
   private setCookie(res: Response, value: string, expires: Date) {
     res.cookie('refreshToken', value, {
       httpOnly: true,
       expires,
-      sameSite: 'lax',
-      secure: false,
+      sameSite: this.isProduction ? 'none' : 'lax',
+      secure: this.isProduction,
+      ...(this.isProduction && { domain: this.COOKIE_DOMAIN }),
     });
   }
   constructor(
     private readonly prismaService: PrismaService,
     private readonly configService: ConfigService,
+    private readonly mailService: MailService,
     private readonly jwtService: JwtService,
   ) {
     this.JWT_ACCESS_TOKEN_TTL = configService.getOrThrow<string>(
@@ -38,19 +55,22 @@ export class AuthService {
       'JWT_REFRESH_TOKEN_TTL',
     );
     this.COOKIE_DOMAIN = configService.getOrThrow<string>('COOKIE_DOMAIN');
+    this.isProduction =
+      configService.getOrThrow<string>('NODE_ENV') === 'production';
   }
 
   async register(res: Response, dto: RegisterRequest) {
-    const { fullName, email, password } = dto;
+    const { fullName, email } = dto;
     const existingUser = await this.prismaService.user.findUnique({
       where: { email: email.toLowerCase() },
     });
 
     if (existingUser) {
-      throw new ConflictException('User with this email already exists');
+      throw new ConflictException('Пользователь с таким email уже существует');
     }
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const generatedPassword = randomBytes(6).toString('hex');
 
+    const hashedPassword = await bcrypt.hash(generatedPassword, 10);
     const user = await this.prismaService.user.create({
       data: {
         fullName,
@@ -67,14 +87,16 @@ export class AuthService {
         mobileAchievedAt: new Date(),
         bestBackendScore: 0,
         bestFrontendScore: 0,
-
         bestMobileScore: 0,
       },
     });
 
+    this.mailService
+      .sendWelcomeEmail(user.email, user.fullName, generatedPassword)
+      .catch((err) => console.error('Ошибка отправки письма:', err));
+
     return {
       user: { ...user, password: undefined, bestResult },
-      tokens: this.auth(res, user.id),
     };
   }
   async refresh(res: Response, req: Request) {
@@ -88,21 +110,90 @@ export class AuthService {
     } catch {
       throw new UnauthorizedException('Invalid or expired refresh token');
     }
-    if (payload) {
-      const user = await this.prismaService.user.findUnique({
-        where: {
-          id: payload.id,
-        },
-        select: {
-          id: true,
-        },
-      });
-      if (!user) {
-        throw new NotFoundException('User not found');
-      }
+
+    const user = await this.prismaService.user.findUnique({
+      where: { id: payload.id },
+      select: { id: true },
+    });
+    if (!user) {
+      throw new NotFoundException('User not found');
     }
+
     return this.auth(res, payload.id);
   }
+
+  async forgotPassword(dto: ForgotPasswordDto) {
+    const { email } = dto;
+
+    const user = await this.prismaService.user.findUnique({
+      where: { email: email.toLowerCase() },
+    });
+
+    if (!user) {
+      return {
+        message: 'Если аккаунт существует, письмо для сброса отправлено',
+      };
+    }
+
+    const resetPayload: ResetTokenPayload = {
+      id: user.id,
+      purpose: 'password-reset',
+    };
+    const resetToken = this.jwtService.sign(resetPayload, {
+      expiresIn: '15m' as StringValue,
+    });
+
+    this.mailService
+      .sendPasswordResetEmail(user.email, user.fullName, resetToken)
+      .catch((err) => console.error('Ошибка отправки письма сброса:', err));
+
+    return { message: 'Если аккаунт существует, письмо для сброса отправлено' };
+  }
+
+  async resetPassword(dto: ResetPasswordDto) {
+    const { token, newPassword, confirmPassword } = dto;
+
+    if (newPassword !== confirmPassword) {
+      throw new BadRequestException('Пароли не совпадают');
+    }
+
+    let payload: ResetTokenPayload;
+    try {
+      payload = await this.jwtService.verifyAsync<ResetTokenPayload>(token);
+    } catch {
+      throw new UnauthorizedException(
+        'Токен сброса пароля невалиден или истёк',
+      );
+    }
+
+    if (payload.purpose !== 'password-reset') {
+      throw new UnauthorizedException(
+        'Токен сброса пароля невалиден или истёк',
+      );
+    }
+
+    const user = await this.prismaService.user.findUnique({
+      where: { id: payload.id },
+    });
+    if (!user) {
+      throw new NotFoundException('Пользователь не найден');
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    await this.prismaService.user.update({
+      where: { id: user.id },
+      data: { password: hashedPassword },
+    });
+
+    this.mailService
+      .sendPasswordChangedEmail(user.email, user.fullName)
+      .catch((err) =>
+        console.error('Ошибка отправки подтверждения смены пароля:', err),
+      );
+
+    return { message: 'Пароль успешно изменён' };
+  }
+
   private auth(res: Response, id: string) {
     const { accessToken, refreshToken } = this.generateTokens(id);
     this.setCookie(
@@ -137,6 +228,7 @@ export class AuthService {
     if (!isPasswordValid) {
       throw new NotFoundException('Invalid email or password');
     }
+
     return {
       user: { ...user, password: undefined },
       tokens: this.auth(res, user.id),
@@ -144,7 +236,7 @@ export class AuthService {
   }
   // eslint-disable-next-line @typescript-eslint/require-await
   async logout(res: Response) {
-    this.setCookie(res, 'refreshToken', new Date(0));
+    this.setCookie(res, '', new Date(0));
     return { message: 'Logged out successfully' };
   }
 }
