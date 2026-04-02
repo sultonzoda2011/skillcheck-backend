@@ -12,7 +12,7 @@ import { Authorized } from 'src/auth/decorators/authorized.decorator';
 import { JwtGuard } from 'src/auth/guards/auth.guard';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { RolesGuard } from 'src/common/guards/role.guard';
-import { User } from 'src/generated/prisma/client';
+import { User } from '@prisma/client';
 import { CreateReviewDto } from 'src/reviews/dto/create-review.dto';
 import { ReviewsService } from './reviews.service';
 

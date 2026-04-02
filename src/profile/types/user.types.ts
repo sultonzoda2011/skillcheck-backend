@@ -1,4 +1,4 @@
-import { Prisma, User } from 'src/generated/prisma';
+import { Prisma, User } from '@prisma/client';
 
 export type SafeUser = Omit<User, 'password'>;
 
