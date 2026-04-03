@@ -62,9 +62,13 @@ export class BestResultsService {
       updateData.bestMobileScore ?? bestResult?.bestMobileScore ?? 0;
     updateData.totalScore = newFrontend + newBackend + newMobile;
 
-    return this.prismaService.bestResult.update({
+    return this.prismaService.bestResult.upsert({
       where: { userId },
-      data: updateData,
+      update: updateData,
+      create: {
+        userId,
+        ...updateData,
+      },
     });
   }
   async getLeaderboard() {
